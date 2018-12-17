@@ -21,4 +21,5 @@ public:
 	bool switched;
 
 	void OnSwitch();
+	void OnGameOver(bool win);
 };
