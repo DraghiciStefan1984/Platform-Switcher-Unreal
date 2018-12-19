@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "GameWidget.h"
 #include "MainGameMode.generated.h"
 
 /**
@@ -22,4 +23,15 @@ public:
 
 	void OnSwitch();
 	void OnGameOver(bool win);
+	void OnRestart();
+
+	UFUNCTION(BlueprintCallable, Category = "UMG Game")
+	void ChangeMenuWidget(TSubclassOf<UUserWidget> widgetClass);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG Game")
+	TSubclassOf<UUserWidget> startingWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* currentWidget;
 };

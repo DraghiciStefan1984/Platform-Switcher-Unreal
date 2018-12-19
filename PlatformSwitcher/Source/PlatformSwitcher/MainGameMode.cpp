@@ -6,12 +6,17 @@
 #include "Runtime/Engine/Classes/Components/InputComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "GameWidget.h"
 #include "Runtime/Engine/Classes/GameFramework/Character.h"
 
 void AMainGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	GetWorld()->GetFirstPlayerController()->InputComponent->BindAction("Switch", IE_Pressed, this, &AMainGameMode::OnSwitch);
+	GetWorld()->GetFirstPlayerController()->InputComponent->BindAction("Restart", IE_Pressed, this, &AMainGameMode::OnRestart).bExecuteWhenPaused = true;
+	ChangeMenuWidget(startingWidgetClass);
+	((UGameWidget*)currentWidget)->Load();
 }
 
 void AMainGameMode::Tick(float DeltaSeconds)
@@ -40,4 +45,30 @@ void AMainGameMode::OnSwitch()
 void AMainGameMode::OnGameOver(bool win)
 {
 	UGameplayStatics::SetGamePaused(GetWorld(), win);
+	((UGameWidget*)currentWidget)->OnGameOver(win);
+
+}
+
+void AMainGameMode::ChangeMenuWidget(TSubclassOf<UUserWidget> widgetClass)
+{
+	if (currentWidget != nullptr)
+	{
+		currentWidget->RemoveFromViewport();
+		currentWidget = nullptr;
+	}
+
+	if (widgetClass != nullptr)
+	{
+		currentWidget = CreateWidget<UUserWidget>(GetWorld(), widgetClass);
+
+		if (currentWidget != nullptr)
+		{
+			currentWidget->AddToViewport();
+		}
+	}
+}
+
+void AMainGameMode::OnRestart()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
